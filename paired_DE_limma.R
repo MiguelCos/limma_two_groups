@@ -135,10 +135,34 @@ top_n_hits <- slice_min(output_limma2, order_by = adj.P.Val, n = n_top_hits)
 
 
 ## Extract basic information about each contrasts ----
+## Prep volcano plots for contrasts ----
 
-getinfo <- function(x){
-      x %>% dplyr::filter(adj.P.Val <= 0.05) %>% dim(.) %>% .[1]
-}
+merged_limmacontr <- reshape::merge_all(list_tabular)
+
+write.table(merged_limmacontr,
+            file = "Output/tab_output_per_contrasts_limma.txt",
+            row.names = FALSE, col.names = TRUE)
+
+
+tovolc <- merged_limmacontr %>% mutate(Differentially_expressed = case_when(adj.P.Val <= 0.05 ~ TRUE,
+                                                                            TRUE ~ FALSE))
+
+tovolc <- left_join(tovolc, unip2symbol, by = "Protein")
+
+
+volcanoes <- ggplot(data = tovolc, 
+                    mapping = aes(x = logFC,
+                                  y = -log10(adj.P.Val),
+                                  color = Differentially_expressed,
+                                  label = paste(Protein, "_", SYMBOL, sep = ""))) + 
+   geom_point(alpha = 0.5) + 
+   geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
+   facet_wrap(~ Contrast, ncol = 3)+
+   theme(legend.position = "none")
+
+print(volcanoes)
+
+## Extract basic information about each contrasts ----
 
 ## Prep some boxplots for the top proteins with lowest P-values ----
 
@@ -150,32 +174,16 @@ slim_expr_g <- left_join(slim_expr, annot_dat,
                          by = "Sample_ID")
 
 hits_expr <- filter(slim_expr_g,
-                    ID %in% row.names(top_n_hits))
+                    ID %in% row.names(top_n_hits)) %>%
+   dplyr::rename(Protein = "ID")
 
+hits_expr <- left_join(hits_expr, unip2symbol, by = "Protein")
 
 boxplots <- ggplot(hits_expr,
                    aes(x = Group, y = Abundance)) +
-      geom_boxplot()+
-      facet_wrap(ID ~ .)
-
-## Prep volcano plots for contrasts ----
-
-merged_limmacontr <- reshape::merge_all(list_tabular)
-
-tovolc <- merged_limmacontr %>% mutate(Differentially_expressed = case_when(adj.P.Val <= 0.05 ~ TRUE,
-                                                                            TRUE ~ FALSE))
-
-volcanoes <- ggplot(data = tovolc, 
-                    mapping = aes(x = logFC,
-                                  y = -log10(adj.P.Val),
-                                  color = Differentially_expressed)) + 
-      geom_point(alpha = 0.5) + 
-      geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
-      facet_wrap(~ Contrast, ncol = 3)+
-      theme(legend.position = "none")
-
-print(volcanoes)
+   geom_boxplot()+
+   facet_wrap(SYMBOL ~ .)
 
 rmarkdown::render(input = here::here("renderReport.R"),
-                  output_file = paste0("Output/limma_paired_DE_analysis_report_",exper_code))
+                  output_file = paste0("Output/limma_anova_report_",exper_code))
 
