@@ -14,7 +14,7 @@ The script would take one expression data file and an annotation file and execut
 
 1. Download this repository in your local computer and initialize it as an R Project in RStudio.
 2. Place the two input files in the `Data` folder.
-3. Open the `multigroup_limma.R` script. 
+3. Open the `paired_DE_limma.R` script. 
 4. Answer the questions on line `6` and line `10` and `14` of the script.
 5. Define the paired contrasts that you are interested to evaluate, by modifiying `contrast.matrix` input at line `60`. (Check below how to set up your contrast matrix)
 6. Click `Source` in the top right corner of the script.
