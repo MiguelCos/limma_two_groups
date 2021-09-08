@@ -50,8 +50,7 @@ library(org_db, character.only = TRUE)
 
 ## Load data ----
 expr_dat <- read.delim("Data/input_limma.txt", sep = ",") %>%
-          dplyr::mutate(expr_dat,
-                        ID = stringr::str_remove_all(ID, ";.*$"))
+          dplyr::mutate(ID = stringr::str_remove_all(ID, ";.*$"))
 
 annot_dat <- read.delim("Data/annotation.txt")
 
