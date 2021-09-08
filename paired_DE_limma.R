@@ -13,11 +13,16 @@ n_top_hits <- 12
 
 robust <- TRUE # or FALSE if not.
 
+### 4. Define the Organism database (human = "org.Hs.eg.db", mouse = "org.Mm.eg.db")
+# more: check: http://bioconductor.org/packages/release/BiocViews.html#___OrgDb
+
+org_db <- "org.Hs.eg.db"
+
 ## Required packages ----
 
 packages <- c("dplyr", "here", "tidyr", "ggplot2", "rmarkdown", "knitr", "reshape")
 
-biopackgs <- c("limma")
+biopackgs <- c("limma", "clusterProfiler", org_db)
 
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
       install.packages(setdiff(packages, rownames(installed.packages())))  
@@ -40,9 +45,13 @@ library(knitr)
 library(kableExtra)
 library(reshape)
 library(plotly)
+library(clusterProfiler)
+library(org_db, character.only = TRUE)
 
 ## Load data ----
-expr_dat <- read.delim("Data/input_limma.txt", sep = ",")
+expr_dat <- read.delim("Data/input_limma.txt", sep = ",") %>%
+          dplyr::mutate(expr_dat,
+                        ID = stringr::str_remove_all(ID, ";.*$"))
 
 annot_dat <- read.delim("Data/annotation.txt")
 
@@ -130,7 +139,7 @@ sig_hits <- dplyr::filter(output_limma2,
 
 n_significant <- length(sig_hits)
 
-top_n_hits <- slice_min(output_limma2, order_by = adj.P.Val, n = n_top_hits)
+top_n_hits <- slice_min(output_limma2, order_by = P.Value, n = n_top_hits)
 
 
 ## Extract basic information about each contrasts ----
@@ -145,6 +154,12 @@ write.table(merged_limmacontr,
 
 tovolc <- merged_limmacontr %>% mutate(Differentially_expressed = case_when(adj.P.Val <= 0.05 ~ TRUE,
                                                                             TRUE ~ FALSE))
+
+unip2symbol <- clusterProfiler::bitr(geneID = tovolc$Protein,
+                                     fromType = "UNIPROT",
+                                     toType = "SYMBOL",
+                                     OrgDb = org_db) %>% 
+          dplyr::rename(Protein = UNIPROT)
 
 tovolc <- left_join(tovolc, unip2symbol, by = "Protein")
 
@@ -182,6 +197,8 @@ boxplots <- ggplot(hits_expr,
                    aes(x = Group, y = Abundance)) +
    geom_boxplot()+
    facet_wrap(SYMBOL ~ .)
+
+boxplots
 
 rmarkdown::render(input = here::here("renderReport.R"),
                   output_file = paste0("Output/limma_anova_report_",exper_code))
