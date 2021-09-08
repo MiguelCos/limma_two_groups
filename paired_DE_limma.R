@@ -81,7 +81,7 @@ row.names(design) %>% head()
 
 tomat <- dplyr::select(expr_dat, row.names(design))
 
-row.names(tomat) <- expr_dat$Protein.Names
+row.names(tomat) <- expr_dat$ID
 
 mat <- as.matrix(tomat)
 
