@@ -6,7 +6,7 @@ The script would take one expression data file and an annotation file and execut
 
 ###  Input requirements:
 
-- 1 File named `input_limma.txt`. It should be tab separated and should contain normalized protein expression data. The first column should be named `ID` and should contain protein IDs (i.e. Uniprot or Symbol). Every other column should correspond to an experimental sample / individual, and should contain the corresponding protein expression values. These column should have a distinctive name.
+- 1 File named `input_limma.txt`. It should be tab separated and should contain normalized protein expression data. The first column should be named `ID` and should contain protein IDs (i.e. Uniprot or Symbol). Every other column should correspond to an experimental sample / individual, and should contain the corresponding protein expression values. These columns should have a distinctive name.
 
 - 1 File named `annotation.txt` that would map the names of your experimental samples / individuals to each experimental group. The first column should be called `Sample_ID` and should contain exactly the same names/sample codes given in the columns of the expression data file. The second column should be named `Group` and should contain the group that corresponds to each individual / sample.
 
