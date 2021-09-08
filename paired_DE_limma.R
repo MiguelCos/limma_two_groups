@@ -42,7 +42,6 @@ library(reshape)
 library(plotly)
 
 ## Load data ----
-# input from Klara Limma unique genes
 expr_dat <- read.delim("Data/input_limma.txt", sep = ",")
 
 annot_dat <- read.delim("Data/annotation.txt")
@@ -76,13 +75,13 @@ contrast.matrix <- makeContrasts(Tumor-normal, levels=design) # MODIFY THIS LINE
 ## Prep expression data matrix ----
 n_contrasts <- dim(contrast.matrix)[2]
 
-expression_data1[1:5,1:5]
+expr_dat[1:5,1:5]
 design %>% head()
 row.names(design) %>% head()
 
-tomat <- dplyr::select(expression_data1, row.names(design))
+tomat <- dplyr::select(expr_dat, row.names(design))
 
-row.names(tomat) <- expression_data1$Protein.Names
+row.names(tomat) <- expr_dat$Protein.Names
 
 mat <- as.matrix(tomat)
 
